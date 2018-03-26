@@ -1,5 +1,4 @@
 #include "encode_1_2.h"
-#include "sys.h"
 
 #define tracelen 32
 #define NULL ((void*)0)
@@ -9,14 +8,14 @@ int temp;
 int encoder_buffer[7];
 int encode_i;
 const int s[64] = { 0, 32, 16, 48, 8, 40, 24, 56, 4, 36, 20, 52, 12, 44, 28, 60, 2, 34, 18, 50, 10, 42, 26, 58, 6, 38, 22, 54, 14, 46, 30, 62,
-1, 33, 17, 49, 9, 41, 25, 57, 5, 37, 21, 53, 13, 45, 29, 61, 3, 35, 19, 51, 11, 43, 27, 59, 7, 39, 23, 55, 15, 47, 31, 63 };//Áù¸ö¼Ä´æÆ÷£¬64¸ö×´Ì¬
-struct sta                                  /*¶¨ÒåÍø¸ñÍ¼ÖĞÃ¿Ò»µãÎªÒ»¸ö½á¹¹Ìå,ÆäÔªËØ°üÀ¨*/
+1, 33, 17, 49, 9, 41, 25, 57, 5, 37, 21, 53, 13, 45, 29, 61, 3, 35, 19, 51, 11, 43, 27, 59, 7, 39, 23, 55, 15, 47, 31, 63 };//å…­ä¸ªå¯„å­˜å™¨ï¼Œ64ä¸ªçŠ¶æ€
+struct sta                                  /*å®šä¹‰ç½‘æ ¼å›¾ä¸­æ¯ä¸€ç‚¹ä¸ºä¸€ä¸ªç»“æ„ä½“,å…¶å…ƒç´ åŒ…æ‹¬*/
 {
-	int met;                                /*×ªÒÆµ½´Ë×´Ì¬ÀÛ¼ÆµÄ¶ÈÁ¿Öµ*/
-	int value;                              /*ÊäÈë·ûºÅ */
-	struct sta *last;                       /*¼°Ö¸ÏòÇ°Ò»¸ö×´Ì¬µÄÖ¸Õë*/
+	int met;                                /*è½¬ç§»åˆ°æ­¤çŠ¶æ€ç´¯è®¡çš„åº¦é‡å€¼*/
+	int value;                              /*è¾“å…¥ç¬¦å· */
+	struct sta *last;                       /*åŠæŒ‡å‘å‰ä¸€ä¸ªçŠ¶æ€çš„æŒ‡é’ˆ*/
 };
-struct  sta state[64][33];                   //¶¨Òå½á¹¹ÌåstaÀàĞÍµÄ¶şÎ¬Êı×é£¨Íø¸ñÍ¼64¸ö×´Ì¬£©
+struct  sta state[64][33];                   //å®šä¹‰ç»“æ„ä½“staç±»å‹çš„äºŒç»´æ•°ç»„ï¼ˆç½‘æ ¼å›¾64ä¸ªçŠ¶æ€ï¼‰
 struct  sta *g;
 int sym, sym1, sym2;
 
@@ -135,15 +134,15 @@ int decode_1_2(int input)
 			int met1 = state[p][t - 1].met + ((input + sym1) & 1) + (((input >> 1) + (sym1 >> 1)) & 1);
 			int met2 = state[p + 32][t - 1].met + ((input + sym2) & 1) + (((input >> 1) + (sym2 >> 1)) & 1);
 			state[q][t].value = ((s[q] >> 5) & 1);
-			if (met1>met2)  //±£ÁôÀÛ¼ÆººÃ÷¶ÈÁ¿Ğ¡µÄ·ÖÖ§ÎªĞÒ´æÂ·¾¶
+			if (met1>met2)  //ä¿ç•™ç´¯è®¡æ±‰æ˜åº¦é‡å°çš„åˆ†æ”¯ä¸ºå¹¸å­˜è·¯å¾„
 			{
 				state[q][t].met = met2;
-				state[q][t].last = &state[p + 32][t - 1]; //µÚt¸öÍø¶Î¼´´Ó×´Ì¬s[p + 32]µ½s[q], ¼´t - 1Ê±¿Ì¶ÔÓ¦µÄ×´Ì¬Îªs[p + 32]
+				state[q][t].last = &state[p + 32][t - 1]; //ç¬¬tä¸ªç½‘æ®µå³ä»çŠ¶æ€s[p + 32]åˆ°s[q], å³t - 1æ—¶åˆ»å¯¹åº”çš„çŠ¶æ€ä¸ºs[p + 32]
 			}
 			else
 			{
 				state[q][t].met = met1;
-				state[q][t].last = &state[p][t - 1];//µÚt¸öÍø¶Î¼´´Ó×´Ì¬s[p]µ½s[q],¼´t-1Ê±¿Ì¶ÔÓ¦µÄ×´Ì¬Îªs[p]
+				state[q][t].last = &state[p][t - 1];//ç¬¬tä¸ªç½‘æ®µå³ä»çŠ¶æ€s[p]åˆ°s[q],å³t-1æ—¶åˆ»å¯¹åº”çš„çŠ¶æ€ä¸ºs[p]
 			}
 		}
 		t++;
@@ -167,48 +166,7 @@ int decode_1_2(int input)
 			int met1 = state[p][k].met + ((input + sym1) & 1) + (((input >> 1) + (sym1 >> 1)) & 1);
 			int met2 = state[p + 32][k].met + ((input + sym2) & 1) + (((input >> 1) + (sym2 >> 1)) & 1);
 			state[q][t].value = ((s[q] >> 5) & 1);
-			if (met1 > met2)  //±£ÁôÀÛ¼ÆººÃ÷¶ÈÁ¿Ğ¡µÄ·ÖÖ§ÎªĞÒ´æÂ·¾¶
+			if (met1 > met2)  //ä¿ç•™ç´¯è®¡æ±‰æ˜åº¦é‡å°çš„åˆ†æ”¯ä¸ºå¹¸å­˜è·¯å¾„
 			{
 				state[q][t].met = met2;
-				//state[q][t].last = &state[p + 32][t - 1]; //µÚt¸öÍø¶Î¼´´Ó×´Ì¬s[p + 32]µ½s[q], ¼´t - 1Ê±¿Ì¶ÔÓ¦µÄ×´Ì¬Îªs[p + 32]
-				state[q][t].last = &state[p + 32][k];
-			}
-			else
-			{
-				state[q][t].met = met1;
-				//state[q][t].last = &state[p][t - 1];//µÚt¸öÍø¶Î¼´´Ó×´Ì¬s[p]µ½s[q],¼´t-1Ê±¿Ì¶ÔÓ¦µÄ×´Ì¬Îªs[p]
-				state[q][t].last = &state[p][k];
-			}
-		}
-
-		r = state[0][t].met;                  /*ÕÒ³ön²½ºó¶ÈÁ¿Öµ×îĞ¡µÄ×´Ì¬£¬×¼±¸»ØËİÂ·ÓÉ*/
-		a = 0;
-		for (int v = 1; v < 64; v++)
-		{
-			if (state[v][t].met<r)
-			{
-				r = state[v][t].met;
-				a = v;
-			}
-		}
-
-		g = &state[a][t];    //gÊÇ½á¹¹ÌåÖ¸Õë
-		//¿ªÊ¼»ØËİÂ·ÓÉ
-	//	for (u = t; u>t - tracelen; u--)              /*ÏòÇ°µİ¹éµÄÕÒ³ö×î´óËÆÈ»Â·¾¶ */
-		for (u = 0; u<tracelen; u++)
-		{
-			g = g->last;//ÌáÈ¡state[0][N-1].last	
-		}
-		output = g->value;
-      //  t++;
-		if (t == tracelen)
-			t = 0;
-		else
-			t++;
-			
-		temp++;
-		return output;
-
-	}
-
-}
+				//state[q][t].last = &state[p + 32][t - 1]
